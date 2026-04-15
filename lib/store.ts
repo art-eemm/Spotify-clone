@@ -68,6 +68,8 @@ interface PlayerState {
   toggleRepeat: () => void
   addToQueue: (song: Song) => void
   setQueue: (songs: Song[]) => void
+  playAllFromIndex: (songs: Song[], index: number) => void
+  clearQueue: () => void
 }
 
 interface PlaylistState {
