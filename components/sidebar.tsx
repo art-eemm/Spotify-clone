@@ -63,7 +63,7 @@ export function Sidebar() {
             />
             <NavItem
               icon={Library}
-              label="Tu Biblioteca"
+              label="Biblioteca"
               active={currentView === "library"}
               onClick={() => setView("library")}
             />

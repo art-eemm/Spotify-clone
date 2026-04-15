@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 import { MobileNav } from "./movile-nav"
+import { PlayerBar } from "./player-bar"
 
 export function MusicApp() {
   return (
@@ -16,6 +17,7 @@ export function MusicApp() {
       </main>
 
       <MobileNav />
+      <PlayerBar />
     </div>
   )
 }
