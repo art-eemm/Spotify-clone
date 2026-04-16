@@ -2,7 +2,9 @@
 
 import { Play } from "lucide-react"
 import { SongCard } from "../song-card"
-import { mockArtists, mockSongs, usePlayerStore } from "@/lib/store"
+import { ArtistCard } from "../artist-card"
+import { AlbumCard } from "../album-card"
+import { mockArtists, mockSongs, mockAlbums, usePlayerStore } from "@/lib/store"
 
 export function HomeView() {
   const { playAllFromIndex } = usePlayerStore()
@@ -65,11 +67,45 @@ export function HomeView() {
             Ver todo
           </button>
         </div>
-        {/* <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {mockArtists.slice(0, 6).map((artist) => (
             <ArtistCard key={artist.id} artist={artist} />
           ))}
-        </div> */}
+        </div>
+      </section>
+
+      {/* Recommended */}
+      <section className="mb-6 sm:mb-8">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
+            Para ti
+          </h2>
+          <button className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:text-sm">
+            Ver todo
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {mockSongs.slice(6, 12).map((song) => (
+            <SongCard key={song.id} song={song} />
+          ))}
+        </div>
+      </section>
+
+      {/* Albums */}
+      <section className="mb-6 sm:mb-8">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
+            Albums Populares
+          </h2>
+          <button className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:text-sm">
+            Ver todo
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {mockAlbums.slice(0, 6).map((album) => (
+            <AlbumCard key={album.id} album={album} />
+          ))}
+        </div>
       </section>
     </div>
   )
