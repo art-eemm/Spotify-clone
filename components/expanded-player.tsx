@@ -132,7 +132,45 @@ export function ExpandedPlayer({
             <p className="text-[10px] tracking-wider text-muted-foreground uppercase sm:text-xs">
               Escuchando
             </p>
+            <p className="truncate text-xs font-medium text-foreground sm:text-sm">
+              {currentSong.album}
+            </p>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="-mr-2 p-2 text-muted-foreground transition-colors hover:text-foreground active:scale-95">
+                <MoreHorizontal className="h-6 w-6 sm:h-7 sm:w-7" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 border-border bg-card"
+            >
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="cursor-pointer">
+                  <Music className="mr-2 h-4 w-4" />
+                  Agregar a playlist
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="border-border bg-card">
+                  {playlists.map((playlist) => (
+                    <DropdownMenuItem
+                      key={playlist.id}
+                      onClick={() =>
+                        addSongToPlaylist(playlist.id, currentSong)
+                      }
+                      className="cursor-pointer"
+                    >
+                      {playlist.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuItem className="cursor-pointer">
+                <Share2 className="mr-2 h-4 w-4" />
+                Compartir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

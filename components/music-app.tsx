@@ -7,6 +7,7 @@ import { Header } from "./header"
 import { MobileNav } from "./movile-nav"
 import { PlayerBar } from "./player-bar"
 import { HomeView } from "./views/home-view"
+import { SearchView } from "./views/search-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
 
 export function MusicApp() {
@@ -28,6 +29,8 @@ export function MusicApp() {
     switch (currentView) {
       case "home":
         return <HomeView />
+      case "search":
+        return <SearchView />
       default:
         return <HomeView />
     }
