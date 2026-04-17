@@ -172,6 +172,167 @@ export function ExpandedPlayer({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-6 pb-4 sm:px-8 lg:px-16">
+          {/* Art */}
+          <div className="group relative mb-6 aspect-square w-full max-w-70 shrink-0 sm:mb-8 sm:max-w-sm md:max-w-md">
+            <img
+              src={currentSong.cover}
+              alt={currentSong.name}
+              className="h-full w-full rounded-lg object-cover shadow-2xl"
+            />
+            <div className="absolute inset-0 rounded-lg bg-background/10 opacity-0 transition-opacity group-hover:opacity-100" />
+          </div>
+
+          {/* Info */}
+          <div className="mb-4 w-full max-w-md shrink-0 sm:mb-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate text-xl font-bold text-foreground sm:text-2xl lg:text-3xl">
+                  {currentSong.name}
+                </h2>
+                <p className="truncate text-base text-muted-foreground sm:text-lg">
+                  {currentSong.artist}
+                </p>
+              </div>
+              <button
+                onClick={handleLike}
+                className={cn(
+                  "shrink-0 p-2 transition-colors active:scale-95",
+                  isLiked
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                )}
+              >
+                <Heart
+                  className={cn(
+                    "h-6 w-6 cursor-pointer sm:h-7 sm:w-7",
+                    isLiked && "fill-current"
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Prgoress Bar */}
+          <div className="mb-4 w-full max-w-md shrink-0 sm:mb-6">
+            <div
+              onClick={handleProgressClick}
+              onTouchMove={handleProgressTouch}
+              className="group h-2 w-full cursor-pointer touch-none rounded-full bg-muted sm:h-1.5"
+            >
+              <div
+                className="relative h-full rounded-full bg-foreground transition-colors group-hover:bg-primary"
+                style={{ width: `${progressPercent}%` }}
+              >
+                <div className="absolute top-1/2 right-0 h-4 w-4 -translate-y-1/2 rounded-full bg-foreground opacity-100 shadow-lg transition-opacity group-hover:opacity-100 sm:opacity-0" />
+              </div>
+            </div>
+            <div className="mt-2 flex justify-between">
+              <span className="text-xs text-muted-foreground">
+                {formatTime(progress)}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {formatTime(duration)}
+              </span>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="mb-6 flex shrink-0 items-center justify-center gap-6 sm:mb-8 sm:gap-8">
+            <button
+              onClick={toggleShuffle}
+              className={cn(
+                "cursor-pointer transition-colors active:scale-95",
+                shuffle
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Shuffle className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+            <button
+              onClick={prevSong}
+              className="text-foreground transition-transform hover:scale-105 active:scale-95"
+            >
+              <SkipBack className="h-8 w-8 cursor-pointer fill-current sm:h-10 sm:w-10" />
+            </button>
+            <button
+              onClick={togglePlay}
+              className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-foreground shadow-lg transition-transform hover:scale-105 active:scale-95 sm:h-16 sm:w-16"
+            >
+              {isPlaying ? (
+                <Pause className="h-6 w-6 fill-current text-background sm:h-7 sm:w-7" />
+              ) : (
+                <Play className="ml-1 h-6 w-6 fill-current text-background sm:h-7 sm:w-7" />
+              )}
+            </button>
+            <button
+              onClick={nextSong}
+              className="text-foreground transition-transform hover:scale-105 active:scale-95"
+            >
+              <SkipForward className="s-8 h-8 cursor-pointer fill-current sm:h-10 sm:w-10" />
+            </button>
+            <button
+              onClick={toggleRepeat}
+              className={cn(
+                "cursor-pointer transition-colors active:scale-95",
+                repeat !== "off"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {repeat === "one" ? (
+                <Repeat1 className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Repeat className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </button>
+          </div>
+
+          {/* Extra controls */}
+          <div className="hidden w-full max-w-md shrink-0 items-center justify-between sm:flex">
+            <div className="flex flex-1 items-center gap-3">
+              <button
+                onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {volume === 0 ? (
+                  <VolumeX className="h-5 w-5" />
+                ) : (
+                  <Volume2 className="h-5 w-5" />
+                )}
+              </button>
+              <div
+                onClick={handleVolumeClick}
+                className="group h-1.5 w-24 cursor-pointer rounded-full bg-muted"
+              >
+                <div
+                  className="relative h-full rounded-full bg-foreground transition-colors group-hover:bg-primary"
+                  style={{ width: `${volume * 100}%` }}
+                >
+                  <div className="absolute top-1/2 right-0 h-3 w-3 -translate-y-1/2 rounded-full bg-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground">
+                <Share2 className="h-5 w-5" />
+              </button>
+              <button className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground">
+                <ListMusic className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Queue */}
+          {queue.length > 1 && (
+            <p className="mt-4 shrink-0 text-xs text-muted-foreground sm:mt-6">
+              {currentIndex} de {queue.length} en la cola
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
