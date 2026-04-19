@@ -63,7 +63,7 @@ export async function POST(request: Request){
         const id_album = formData.get("album_id") as string | null;
         const duracion = Number(formData.get("duracion"));
         const audioFile = formData.get("audio") as File;
-        const portada = formData.get("portada") as string | null;
+        const portada = formData.get("portada") as File | null;
         //* DATOS DE GENERO
         const id_genero = formData.get("genero") as string;
         //*DATOS DE ARTISTA
@@ -105,6 +105,35 @@ export async function POST(request: Request){
 
         const url_audio = publicUrl.publicUrl;
 
+        let portadaUrl: string | null = null;
+
+        if (portada && portada.size > 0) {
+            const arrayBuffer = await portada.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            const cleanImageName = sanitizeFileName(portada.name);
+            const imagePath = `portadas/${Date.now()}_${cleanImageName}`;
+
+            const { error: uploadImageError } = await supabaseAdmin.storage
+                .from("portadas")
+                .upload(imagePath, buffer, {
+                    contentType: portada.type,
+                });
+
+            if (uploadImageError) {
+                return NextResponse.json(
+                    { error: uploadImageError.message },
+                    { status: 500 }
+                );
+            }
+
+            const { data: publicImageUrl } = supabaseAdmin.storage
+                .from("images")
+                .getPublicUrl(imagePath);
+
+            portadaUrl = publicImageUrl.publicUrl;
+        }
+
         //* GUARDAMOS EN BASE DE DATOS LA CANCION
         const { data: songData, error: songError } = await supabaseAdmin
         .from("canciones")
@@ -113,7 +142,7 @@ export async function POST(request: Request){
             album_id: id_album || null,
             duracion: duracion,
             url_audio: url_audio,
-            portada: portada || null
+            portada: portadaUrl
         }])
         .select()
         .single();
@@ -174,6 +203,7 @@ export async function POST(request: Request){
 
 }
 
+//* FUNCION PARA SANITIZAR NOMBRES DE ARCHIVOS
 function sanitizeFileName(fileName: string) {
   return fileName
     .normalize("NFD") // quita acentos
