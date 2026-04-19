@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Home, Search, Library, Plus, Heart, Music } from "lucide-react"
+import { Home, Search, Library, Plus, Heart, Music, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useNavigationStore, usePlaylistStore } from "@/lib/store"
+import { useNavigationStore, usePlaylistStore, useAuthStore } from "@/lib/store"
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ export function Sidebar() {
   const [newPlaylistName, setNewPlaylistName] = useState("")
   const { currentView, setView, setCurrentPlaylistId } = useNavigationStore()
   const { playlists, createPlaylist } = usePlaylistStore()
+  const user = useAuthStore((state) => state.user)
 
   const handleCreatePlaylist = () => {
     if (newPlaylistName.trim()) {
@@ -67,6 +68,14 @@ export function Sidebar() {
               active={currentView === "library"}
               onClick={() => setView("library")}
             />
+            {user?.role === "admin" && (
+              <NavItem
+                icon={Shield}
+                label="Panel Admin"
+                active={currentView === "admin"}
+                onClick={() => setView("admin")}
+              />
+            )}
           </ul>
         </nav>
 

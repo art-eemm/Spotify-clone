@@ -40,7 +40,7 @@ export default function LoginPage() {
         return
       }
 
-      login(email, password, data.nombre)
+      login(email, password, data.nombre, data.role, data.token)
       router.push("/")
     } catch (err) {
       setError("Ocurrió un error al conectar con el servidor.")

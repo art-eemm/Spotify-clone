@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
@@ -11,20 +11,26 @@ import { PlaylistView } from "./views/playlist-view"
 import { SettingsView } from "./views/settings-view"
 import { LibraryView } from "./views/library-view"
 import { SearchView } from "./views/search-view"
+import { AdminView } from "./views/admin-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
 
 export function MusicApp() {
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const currentView = useNavigationStore((state) => state.currentView)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    setIsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (isReady && !isAuthenticated) {
       router.push("/login")
     }
   }, [!isAuthenticated, router])
 
-  if (!isAuthenticated) {
+  if (!isReady || !isAuthenticated) {
     return null
   }
 
@@ -40,6 +46,8 @@ export function MusicApp() {
         return <PlaylistView />
       case "settings":
         return <SettingsView />
+      case "admin":
+        return <AdminView />
       default:
         return <HomeView />
     }

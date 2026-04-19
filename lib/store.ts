@@ -38,6 +38,7 @@ interface User {
   id: string
   name: string
   email: string
+  role?: string
   avatar?: string
 }
 
@@ -53,9 +54,16 @@ interface UserSettings {
 
 interface AuthState {
   user: User | null
+  token: string | null
   isAuthenticated: boolean
   settings: UserSettings
-  login: (email: string, password: string, name?: string) => boolean
+  login: (
+    email: string,
+    password: string,
+    name?: string,
+    role?: string,
+    token?: string
+  ) => boolean
   register: (name: string, email: string, password: string) => boolean
   logout: () => void
   updateProfile: (name: string, avatar?: string) => void
@@ -95,11 +103,11 @@ interface PlaylistState {
 }
 
 interface NavigationState {
-  currentView: "home" | "search" | "library" | "playlist" | "settings"
+  currentView: "home" | "search" | "library" | "playlist" | "settings" | "admin"
   currentPlaylistId: string | null
   searchQuery: string
   setView: (
-    view: "home" | "search" | "library" | "playlist" | "settings"
+    view: "home" | "search" | "library" | "playlist" | "settings" | "admin"
   ) => void
   setCurrentPlaylistId: (id: string | null) => void
   setSearchQuery: (query: string) => void
@@ -354,16 +362,24 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
       settings: defaultSettings,
-      login: (email: string, _password: string, name?: string) => {
+      login: (
+        email: string,
+        _password: string,
+        name?: string,
+        role?: string,
+        token?: string
+      ) => {
         // Simulate login - in real app, validate against backend
         const user: User = {
           id: Math.random().toString(36).substr(2, 9),
           name: name || email.split("@")[0],
           email,
+          role: role || "user",
         }
-        set({ user, isAuthenticated: true })
+        set({ user, token, isAuthenticated: true })
         return true
       },
       register: (name: string, email: string, _password: string) => {
@@ -377,7 +393,7 @@ export const useAuthStore = create<AuthState>()(
         return true
       },
       logout: () => {
-        set({ user: null, isAuthenticated: false })
+        set({ user: null, token: null, isAuthenticated: false })
       },
       updateProfile: (name: string, avatar?: string) => {
         set((state) => ({
