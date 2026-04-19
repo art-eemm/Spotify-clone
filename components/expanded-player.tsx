@@ -134,9 +134,9 @@ export function ExpandedPlayer({
             <p className="text-[10px] tracking-wider text-muted-foreground uppercase sm:text-xs">
               Escuchando
             </p>
-            <p className="truncate text-xs font-medium text-foreground sm:text-sm">
+            {/* <p className="truncate text-xs font-medium text-foreground sm:text-sm">
               {currentSong.album}
-            </p>
+            </p> */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

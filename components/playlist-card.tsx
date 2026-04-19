@@ -23,8 +23,8 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
             {playlist.songs.slice(0, 4).map((song, i) => (
               <img
                 key={song.id}
-                src={song.cover}
-                alt={song.name}
+                src={song.portada}
+                alt={song.titulo}
                 className="h-full w-full object-cover"
               />
             ))}

@@ -236,7 +236,7 @@ export function PlaylistView() {
                 </div>
 
                 <span className="hidden truncate text-sm text-muted-foreground md:block">
-                  {song.album}
+                  {song.album_id}
                 </span>
 
                 <span className="hidden text-sm text-muted-foreground sm:block">

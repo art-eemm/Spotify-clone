@@ -4,12 +4,7 @@ import { useMemo } from "react"
 import { SongCard } from "../song-card"
 import { ArtistCard } from "../artist-card"
 import { AlbumCard } from "../album-card"
-import {
-  useNavigationStore,
-  mockSongs,
-  mockArtists,
-  mockAlbums,
-} from "@/lib/store"
+import { useNavigationStore, mockSongs } from "@/lib/store"
 import { Search } from "lucide-react"
 
 export function SearchView() {
@@ -25,25 +20,24 @@ export function SearchView() {
     return {
       songs: mockSongs.filter(
         (song) =>
-          song.name.toLowerCase().includes(query) ||
-          song.artist.toLowerCase().includes(query) ||
-          song.album.toLowerCase().includes(query)
+          song.titulo.toLowerCase().includes(query) ||
+          song.artista.toLowerCase().includes(query) ||
+          song.album_id?.toLowerCase().includes(query)
       ),
-      artists: mockArtists.filter((artist) =>
-        artist.name.toLowerCase().includes(query)
-      ),
-      albums: mockAlbums.filter(
-        (album) =>
-          album.name.toLowerCase().includes(query) ||
-          album.artist.toLowerCase().includes(query)
-      ),
+      // artists: mockArtists.filter((artista) =>
+      //   artist.nombre.toLowerCase().includes(query)
+      // ),
+      // albums: mockAlbums.filter(
+      //   (album) =>
+      //     album.titulo.toLowerCase().includes(query) ||
+      //     album.artista?.toLowerCase().includes(query)
+      // ),
     }
   }, [searchQuery])
 
-  const hasResults =
-    filteredResults.songs.length > 0 ||
-    filteredResults.artists.length > 0 ||
-    filteredResults.albums.length > 0
+  const hasResults = filteredResults.songs.length > 0
+  // filteredResults.artists.length > 0 ||
+  // filteredResults.albums.length > 0
 
   if (!searchQuery.trim()) {
     return (
@@ -123,7 +117,7 @@ export function SearchView() {
       )}
 
       {/* Artists Results */}
-      {filteredResults.artists.length > 0 && (
+      {/* {filteredResults.artists.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-bold text-foreground">Artistas</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -132,10 +126,10 @@ export function SearchView() {
             ))}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Albums Results */}
-      {filteredResults.albums.length > 0 && (
+      {/* {filteredResults.albums.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-bold text-foreground">Albums</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -144,7 +138,7 @@ export function SearchView() {
             ))}
           </div>
         </section>
-      )}
+      )} */}
     </div>
   )
 }
