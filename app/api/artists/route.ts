@@ -61,7 +61,9 @@ export async function POST(request: Request){
             { status: 500 }
         );
     }
-
     return NextResponse.json(data);
-
 }
+
+//* ACTUALIZAR ARTISTA
+
+//* ELIMINAR ARTISTA

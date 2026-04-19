@@ -105,6 +105,7 @@ export async function POST(request: Request){
 
         const url_audio = publicUrl.publicUrl;
 
+        //* SUBIR PORTADA SI EXISTE
         let portadaUrl: string | null = null;
 
         if (portada && portada.size > 0) {
@@ -128,7 +129,7 @@ export async function POST(request: Request){
             }
 
             const { data: publicImageUrl } = supabaseAdmin.storage
-                .from("images")
+                .from("portadas")
                 .getPublicUrl(imagePath);
 
             portadaUrl = publicImageUrl.publicUrl;
