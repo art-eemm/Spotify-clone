@@ -27,6 +27,7 @@ export function PlayerBar() {
     isPlaying,
     volume,
     progress,
+    duration,
     shuffle,
     repeat,
     togglePlay,
@@ -40,20 +41,25 @@ export function PlayerBar() {
   } = usePlayerStore()
 
   useEffect(() => {
-    if (!audioRef.current) return
-
-    if (isPlaying && currentSong) {
-      audioRef.current.play().catch(() => {})
-    } else {
-      audioRef.current.pause()
+    if (audioRef.current && currentSong?.url_audio) {
+      audioRef.current.load()
+      audioRef.current.currentTime = 0
+      if (isPlaying) {
+        audioRef.current.play().catch((e) => console.log("Cargando...", e))
+      }
     }
-  }, [isPlaying, currentSong])
+  }, [currentSong?.url_audio])
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume
+      if (isPlaying && currentSong) {
+        audioRef.current.play().catch((e) => console.log("Reproduciendo...", e))
+      } else {
+        audioRef.current.pause()
+      }
     }
-  }, [volume])
+  }, [isPlaying, volume])
 
   useEffect(() => {
     if (audioRef.current && currentSong) {
@@ -107,7 +113,7 @@ export function PlayerBar() {
     const rect = e.currentTarget.getBoundingClientRect()
     const percent = (e.clientX - rect.left) / rect.width
     const newTime =
-      percent * (audioRef.current.duration || currentSong.duracion)
+      percent * (audioRef.current.duration || currentSong.duracion || 0)
     audioRef.current.currentTime = newTime
     setProgress(newTime)
   }
@@ -124,8 +130,9 @@ export function PlayerBar() {
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  const duration = currentSong?.duracion || 0
-  const progressPercent = duration > 0 ? (progress / duration) * 100 : 0
+  const displayDuration = duration > 0 ? duration : currentSong?.duracion || 0
+  const progressPercent =
+    displayDuration > 0 ? (progress / displayDuration) * 100 : 0
 
   if (!currentSong) {
     return null
@@ -158,7 +165,7 @@ export function PlayerBar() {
               <ChevronUp className="h-4 w-4 text-foreground sm:h-5 sm:w-5" />
             </div>
           </div>
-          <div className="xs:block hidden min-w-0">
+          <div className="block min-w-0">
             <h4 className="truncate text-xs font-medium text-foreground sm:text-sm">
               {currentSong?.titulo}
             </h4>
@@ -238,7 +245,7 @@ export function PlayerBar() {
               </div>
             </div>
             <span className="w-10 text-xs text-muted-foreground">
-              {formatTime(duration)}
+              {formatTime(displayDuration)}
             </span>
           </div>
         </div>

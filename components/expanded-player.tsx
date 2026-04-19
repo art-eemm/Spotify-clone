@@ -47,6 +47,7 @@ export function ExpandedPlayer({
     isPlaying,
     volume,
     progress,
+    duration,
     shuffle,
     repeat,
     queue,
@@ -65,7 +66,7 @@ export function ExpandedPlayer({
     const rect = e.currentTarget.getBoundingClientRect()
     const percent = (e.clientX - rect.left) / rect.width
     const newTime =
-      percent * (audioRef.current.duration || currentSong.duration)
+      percent * (audioRef.current.duration || currentSong.duracion || 0)
     audioRef.current.currentTime = newTime
     setProgress(newTime)
   }
@@ -77,7 +78,7 @@ export function ExpandedPlayer({
     const percent = (touch.clientX - rect.left) / rect.width
     const newTime =
       Math.max(0, Math.min(1, percent)) *
-      (audioRef.current.duration || currentSong.duration)
+      (audioRef.current.duration || currentSong.duracion || 0)
     audioRef.current.currentTime = newTime
     setProgress(newTime)
   }
@@ -103,8 +104,9 @@ export function ExpandedPlayer({
     }
   }
 
-  const duration = currentSong?.duration || 0
-  const progressPercent = duration > 0 ? (progress / duration) * 100 : 0
+  const displayDuration = duration > 0 ? duration : currentSong?.duracion || 0
+  const progressPercent =
+    displayDuration > 0 ? (progress / displayDuration) * 100 : 0
 
   const currentIndex = currentSong
     ? queue.findIndex((s) => s.id === currentSong.id) + 1
@@ -177,8 +179,8 @@ export function ExpandedPlayer({
           {/* Art */}
           <div className="group relative mb-6 aspect-square w-full max-w-70 shrink-0 sm:mb-8 sm:max-w-sm md:max-w-md">
             <img
-              src={currentSong.cover}
-              alt={currentSong.name}
+              src={currentSong.portada}
+              alt={currentSong.titulo}
               className="h-full w-full rounded-lg object-cover shadow-2xl"
             />
             <div className="absolute inset-0 rounded-lg bg-background/10 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -189,10 +191,10 @@ export function ExpandedPlayer({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-xl font-bold text-foreground sm:text-2xl lg:text-3xl">
-                  {currentSong.name}
+                  {currentSong.titulo}
                 </h2>
                 <p className="truncate text-base text-muted-foreground sm:text-lg">
-                  {currentSong.artist}
+                  {currentSong.artista}
                 </p>
               </div>
               <button

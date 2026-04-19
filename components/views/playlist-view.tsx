@@ -76,8 +76,8 @@ export function PlaylistView() {
               {playlist.songs.slice(0, 4).map((song) => (
                 <img
                   key={song.id}
-                  src={song.cover}
-                  alt={song.name}
+                  src={song.portada}
+                  alt={song.titulo}
                   className="h-full w-full object-cover"
                 />
               ))}
@@ -216,8 +216,8 @@ export function PlaylistView() {
 
                 <div className="flex min-w-0 items-center gap-3">
                   <img
-                    src={song.cover}
-                    alt={song.name}
+                    src={song.portada}
+                    alt={song.titulo}
                     className="h-10 w-10 rounded object-cover"
                   />
                   <div className="min-w-0">
@@ -227,10 +227,10 @@ export function PlaylistView() {
                         isCurrentSong ? "text-primary" : "text-foreground"
                       )}
                     >
-                      {song.name}
+                      {song.titulo}
                     </p>
                     <p className="truncate text-sm text-muted-foreground">
-                      {song.artist}
+                      {song.artista}
                     </p>
                   </div>
                 </div>
@@ -240,7 +240,7 @@ export function PlaylistView() {
                 </span>
 
                 <span className="hidden text-sm text-muted-foreground sm:block">
-                  {formatDuration(song.duration)}
+                  {formatDuration(song.duracion)}
                 </span>
 
                 <button

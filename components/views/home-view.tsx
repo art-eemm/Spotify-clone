@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Play } from "lucide-react"
+import { Play, Download } from "lucide-react"
 import { SongCard } from "../song-card"
 import { ArtistCard } from "../artist-card"
 import { AlbumCard } from "../album-card"
@@ -64,6 +64,21 @@ export function HomeView() {
 
   return (
     <div className="px-4 pb-8 md:px-8">
+      <div className="mb-6 flex items-center justify-between rounded-lg border border-primary/20 bg-linear-to-r from-primary/20 to-primary/5 p-4 sm:mb-8">
+        <div className="mr-4">
+          <h3 className="text-sm font-bold text-foreground sm:text-base">
+            Lleva la música contigo
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+            Descarga nuestra app para una mejor experiencia.
+          </p>
+        </div>
+        <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-md transition-transform hover:scale-105 active:scale-95">
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Instalar App</span>
+          <span className="sm:hidden">Instalar</span>
+        </button>
+      </div>
       {/* Play grid */}
       <section className="mb-6 sm:mb-8">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
@@ -102,7 +117,7 @@ export function HomeView() {
       </section>
 
       {/* Top Artists */}
-      <section className="mb-6 sm:mb-8">
+      {/* <section className="mb-6 sm:mb-8">
         <h2 className="mb-4 text-xl font-bold text-foreground sm:text-2xl">
           Artistas Destacados
         </h2>
@@ -111,7 +126,7 @@ export function HomeView() {
             <ArtistCard key={artist.id} artist={artist} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Albums */}
       <section className="mb-6 sm:mb-8">
