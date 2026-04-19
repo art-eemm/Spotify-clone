@@ -22,7 +22,7 @@ export interface Artist {
 
 export interface Album {
   id: string
-  nombre: string
+  titulo: string
   artista?: string
   portada: string
 }
