@@ -235,7 +235,6 @@ export function AdminView() {
 
         <form onSubmit={handleAddSong}>
           <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* --- Columna 1 --- */}
             <div className="space-y-4">
               <Field>
                 <FieldLabel htmlFor="titulo">Título de la canción *</FieldLabel>

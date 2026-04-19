@@ -8,23 +8,23 @@ export interface Song {
   id: string
   titulo: string
   artista: string
-  album: string
+  album_id?: string
   portada: string
-  audioUrl: string
-  duration: number
+  url_audio: string
+  duracion: number
 }
 
 export interface Artist {
   id: string
-  name: string
-  image: string
+  nombre: string
+  imagen?: string
 }
 
 export interface Album {
   id: string
-  name: string
-  artist: string
-  cover: string
+  nombre: string
+  artista?: string
+  portada: string
 }
 
 export interface Playlist {

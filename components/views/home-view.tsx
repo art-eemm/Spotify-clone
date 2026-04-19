@@ -5,12 +5,12 @@ import { Play } from "lucide-react"
 import { SongCard } from "../song-card"
 import { ArtistCard } from "../artist-card"
 import { AlbumCard } from "../album-card"
-import { usePlayerStore } from "@/lib/store"
+import { Album, Song, usePlayerStore } from "@/lib/store"
 
 export function HomeView() {
-  const [songs, setSongs] = useState<any[]>([])
-  const [albums, setAlbums] = useState<any[]>([])
-  const [artists, setArtists] = useState<any[]>([])
+  const [songs, setSongs] = useState<Song>([])
+  const [albums, setAlbums] = useState<Album[]>([])
+  const [artists, setArtists] = useState<Artist[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {

@@ -107,7 +107,7 @@ export function PlayerBar() {
     const rect = e.currentTarget.getBoundingClientRect()
     const percent = (e.clientX - rect.left) / rect.width
     const newTime =
-      percent * (audioRef.current.duration || currentSong.duration)
+      percent * (audioRef.current.duration || currentSong.duracion)
     audioRef.current.currentTime = newTime
     setProgress(newTime)
   }
@@ -124,7 +124,7 @@ export function PlayerBar() {
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  const duration = currentSong?.duration || 0
+  const duration = currentSong?.duracion || 0
   const progressPercent = duration > 0 ? (progress / duration) * 100 : 0
 
   if (!currentSong) {
@@ -133,7 +133,7 @@ export function PlayerBar() {
 
   return (
     <>
-      <audio ref={audioRef} src={currentSong?.audioUrl} preload="metadata" />
+      <audio ref={audioRef} src={currentSong?.url_audio} preload="metadata" />
 
       <ExpandedPlayer
         isOpen={isExpanded}
@@ -150,8 +150,8 @@ export function PlayerBar() {
         >
           <div className="relative shrink-0">
             <img
-              src={currentSong?.cover}
-              alt={currentSong?.name}
+              src={currentSong?.portada}
+              alt={currentSong?.titulo}
               className="h-10 w-10 rounded object-cover sm:h-12 sm:w-12 md:h-14 md:w-14"
             />
             <div className="absolute inset-0 flex items-center justify-center rounded bg-background/40 opacity-0 transition-opacity group-hover:opacity-100">
@@ -160,10 +160,10 @@ export function PlayerBar() {
           </div>
           <div className="xs:block hidden min-w-0">
             <h4 className="truncate text-xs font-medium text-foreground sm:text-sm">
-              {currentSong?.name}
+              {currentSong?.titulo}
             </h4>
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {currentSong?.artist}
+              {currentSong?.artista}
             </p>
           </div>
         </button>
