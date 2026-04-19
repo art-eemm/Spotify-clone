@@ -38,14 +38,28 @@ interface User {
   id: string
   name: string
   email: string
+  avatar?: string
+}
+
+interface UserSettings {
+  audioQuality: "low" | "normal" | "high"
+  crossfade: boolean
+  crossfadeDuration: number
+  normalizeVolume: boolean
+  showLyrics: boolean
+  language: string
+  explicitContent: boolean
 }
 
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  settings: UserSettings
   login: (email: string, password: string, name?: string) => boolean
   register: (name: string, email: string, password: string) => boolean
   logout: () => void
+  updateProfile: (name: string, avatar?: string) => void
+  updateSettings: (settings: Partial<UserSettings>) => void
 }
 
 interface PlayerState {
@@ -81,7 +95,7 @@ interface PlaylistState {
 }
 
 interface NavigationState {
-  currentView: "home" | "search" | "library" | "playlist"
+  currentView: "home" | "search" | "library" | "playlist" | "settings"
   currentPlaylistId: string | null
   searchQuery: string
   setView: (
@@ -325,12 +339,23 @@ export const mockAlbums: Album[] = [
   },
 ]
 
+const defaultSettings: UserSettings = {
+  audioQuality: "high",
+  crossfade: false,
+  crossfadeDuration: 5,
+  normalizeVolume: true,
+  showLyrics: true,
+  language: "en",
+  explicitContent: true,
+}
+
 // Auth Store
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      settings: defaultSettings,
       login: (email: string, _password: string, name?: string) => {
         // Simulate login - in real app, validate against backend
         const user: User = {
@@ -353,6 +378,16 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: () => {
         set({ user: null, isAuthenticated: false })
+      },
+      updateProfile: (name: string, avatar?: string) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, name, avatar } : null,
+        }))
+      },
+      updateSettings: (newSettings: Partial<UserSettings>) => {
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings },
+        }))
       },
     }),
     {
@@ -389,17 +424,32 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
 
     if (shuffle) {
-      const randomIndex = Math.floor(Math.random() * queue.length)
-      set({ currentSong: queue[randomIndex], progress: 0 })
+      // Pick a random song different from current if possible
+      let randomIndex = Math.floor(Math.random() * queue.length)
+      if (queue.length > 1) {
+        while (randomIndex === currentIndex) {
+          randomIndex = Math.floor(Math.random() * queue.length)
+        }
+      }
+      set({ currentSong: queue[randomIndex], progress: 0, isPlaying: true })
     } else if (currentIndex < queue.length - 1) {
-      set({ currentSong: queue[currentIndex + 1], progress: 0 })
+      set({
+        currentSong: queue[currentIndex + 1],
+        progress: 0,
+        isPlaying: true,
+      })
     } else if (repeat === "all") {
-      set({ currentSong: queue[0], progress: 0 })
+      set({ currentSong: queue[0], progress: 0, isPlaying: true })
+    } else {
+      // End of queue, stop playing
+      set({ isPlaying: false })
     }
   },
   prevSong: () => {
-    const { currentSong, queue, progress } = get()
+    const { currentSong, queue, progress, shuffle } = get()
     if (!currentSong || queue.length === 0) return
+
+    const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
 
     // If more than 3 seconds in, restart current song
     if (progress > 3) {
@@ -407,9 +457,24 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       return
     }
 
-    const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
-    if (currentIndex > 0) {
-      set({ currentSong: queue[currentIndex - 1], progress: 0 })
+    if (shuffle) {
+      // In shuffle mode, pick a random previous song
+      let randomIndex = Math.floor(Math.random() * queue.length)
+      if (queue.length > 1) {
+        while (randomIndex === currentIndex) {
+          randomIndex = Math.floor(Math.random() * queue.length)
+        }
+      }
+      set({ currentSong: queue[randomIndex], progress: 0, isPlaying: true })
+    } else if (currentIndex > 0) {
+      set({
+        currentSong: queue[currentIndex - 1],
+        progress: 0,
+        isPlaying: true,
+      })
+    } else {
+      // At start of queue, restart current song
+      set({ progress: 0 })
     }
   },
   toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
@@ -425,6 +490,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         : [...state.queue, song],
     })),
   setQueue: (songs: Song[]) => set({ queue: songs }),
+  playAllFromIndex: (songs: Song[], index: number) => {
+    const song = songs[index]
+    if (song) {
+      set({ queue: songs, currentSong: song, isPlaying: true, progress: 0 })
+    }
+  },
+  clearQueue: () =>
+    set({ queue: [], currentSong: null, isPlaying: false, progress: 0 }),
 }))
 
 // Playlist Store
