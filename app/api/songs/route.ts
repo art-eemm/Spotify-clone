@@ -7,7 +7,26 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export async function GET(){
     const { data, error } = await supabaseClient
         .from('canciones')
-        .select('*');
+        .select(`
+            id,
+            titulo,
+            duracion,
+            url_audio,
+            portada,
+            albums (
+            titulo
+            ),
+            cancion_artista (
+            artistas (
+                nombre
+            )
+            ),
+            cancion_genero (
+            generos (
+                nombre
+            )
+            )
+        `);
 
     if ( error ){
         return NextResponse.json(
@@ -62,7 +81,7 @@ export async function POST(request: Request){
         //* SUBIR AUDIO A SUPABASE STORAGE
         const arrayBuffer = await audioFile.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        
+
         const cleanName = sanitizeFileName(audioFile.name);
         const filePath = `canciones/${Date.now()}_${cleanName}`;
 
