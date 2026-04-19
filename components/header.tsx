@@ -50,8 +50,6 @@ export function Header() {
         <button className="flex h-8 w-8 items-center justify-center rounded-full bg-background/70 text-foreground transition-colors hover:bg-background">
           <ChevronLeft className="h-5 w-5" />
         </button>
-      </div>
-      <div className="hidden items-center gap-2 sm:flex">
         <button className="flex h-8 w-8 items-center justify-center rounded-full bg-background/70 text-foreground transition-colors hover:bg-background">
           <ChevronRight className="h-5 w-5" />
         </button>

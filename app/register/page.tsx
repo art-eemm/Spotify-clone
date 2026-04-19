@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const register = useAuthStore((state) => state.register)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -36,11 +36,26 @@ export default function RegisterPage() {
       return
     }
 
-    const success = register(name, email, password)
-    if (success) {
-      router.push("/")
-    } else {
-      setError("El correo electrónico ya está registrado.")
+    try {
+      const response = await fetch("/api/auth/registro", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nombre: name, email, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Error al registrar usuario.")
+        return
+      }
+
+      register(name, email, password)
+      router.push("/login")
+    } catch (err) {
+      setError("Ocurrió un error al conectar con el servidor.")
     }
   }
 
@@ -117,7 +132,7 @@ export default function RegisterPage() {
                 </FieldLabel>
                 <Input
                   id="confirmPassword"
-                  type="confirmPassword"
+                  type="password"
                   placeholder="Repite la contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}

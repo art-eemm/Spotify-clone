@@ -6,25 +6,25 @@ import { persist } from "zustand/middleware"
 // Types
 export interface Song {
   id: string
-  name: string
-  artist: string
-  album: string
-  cover: string
-  audioUrl: string
-  duration: number
+  titulo: string
+  artista: string
+  album_id?: string
+  portada: string
+  url_audio: string
+  duracion: number
 }
 
 export interface Artist {
   id: string
-  name: string
-  image: string
+  nombre: string
+  imagen?: string
 }
 
 export interface Album {
   id: string
-  name: string
-  artist: string
-  cover: string
+  titulo: string
+  artista?: string
+  portada: string
 }
 
 export interface Playlist {
@@ -38,14 +38,36 @@ interface User {
   id: string
   name: string
   email: string
+  role?: string
+  avatar?: string
+}
+
+interface UserSettings {
+  audioQuality: "low" | "normal" | "high"
+  crossfade: boolean
+  crossfadeDuration: number
+  normalizeVolume: boolean
+  showLyrics: boolean
+  language: string
+  explicitContent: boolean
 }
 
 interface AuthState {
   user: User | null
+  token: string | null
   isAuthenticated: boolean
-  login: (email: string, password: string, name?: string) => boolean
+  settings: UserSettings
+  login: (
+    email: string,
+    password: string,
+    name?: string,
+    role?: string,
+    token?: string
+  ) => boolean
   register: (name: string, email: string, password: string) => boolean
   logout: () => void
+  updateProfile: (name: string, avatar?: string) => void
+  updateSettings: (settings: Partial<UserSettings>) => void
 }
 
 interface PlayerState {
@@ -68,6 +90,8 @@ interface PlayerState {
   toggleRepeat: () => void
   addToQueue: (song: Song) => void
   setQueue: (songs: Song[]) => void
+  playAllFromIndex: (songs: Song[], index: number) => void
+  clearQueue: () => void
 }
 
 interface PlaylistState {
@@ -79,11 +103,11 @@ interface PlaylistState {
 }
 
 interface NavigationState {
-  currentView: "home" | "search" | "library" | "playlist"
+  currentView: "home" | "search" | "library" | "playlist" | "settings" | "admin"
   currentPlaylistId: string | null
   searchQuery: string
   setView: (
-    view: "home" | "search" | "library" | "playlist" | "settings"
+    view: "home" | "search" | "library" | "playlist" | "settings" | "admin"
   ) => void
   setCurrentPlaylistId: (id: string | null) => void
   setSearchQuery: (query: string) => void
@@ -93,250 +117,49 @@ interface NavigationState {
 export const mockSongs: Song[] = [
   {
     id: "1",
-    name: "Blinding Lights",
-    artist: "The Weeknd",
-    album: "After Hours",
-    cover:
+    titulo: "Blinding Lights",
+    artista: "The Weeknd",
+    album_id: "1",
+    portada:
       "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    duration: 200,
-  },
-  {
-    id: "2",
-    name: "Levitating",
-    artist: "Dua Lipa",
-    album: "Future Nostalgia",
-    cover:
-      "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    duration: 203,
-  },
-  {
-    id: "3",
-    name: "Stay",
-    artist: "The Kid LAROI, Justin Bieber",
-    album: "F*CK LOVE 3",
-    cover:
-      "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    duration: 141,
-  },
-  {
-    id: "4",
-    name: "Heat Waves",
-    artist: "Glass Animals",
-    album: "Dreamland",
-    cover:
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-    duration: 238,
-  },
-  {
-    id: "5",
-    name: "Peaches",
-    artist: "Justin Bieber",
-    album: "Justice",
-    cover:
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-    duration: 198,
-  },
-  {
-    id: "6",
-    name: "Montero",
-    artist: "Lil Nas X",
-    album: "Montero",
-    cover:
-      "https://images.unsplash.com/photo-1484755560615-a4c64e778a6c?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-    duration: 137,
-  },
-  {
-    id: "7",
-    name: "Industry Baby",
-    artist: "Lil Nas X, Jack Harlow",
-    album: "Montero",
-    cover:
-      "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
-    duration: 212,
-  },
-  {
-    id: "8",
-    name: "Good 4 U",
-    artist: "Olivia Rodrigo",
-    album: "SOUR",
-    cover:
-      "https://images.unsplash.com/photo-1619983081563-430f63602796?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-    duration: 178,
-  },
-  {
-    id: "9",
-    name: "drivers license",
-    artist: "Olivia Rodrigo",
-    album: "SOUR",
-    cover:
-      "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
-    duration: 242,
-  },
-  {
-    id: "10",
-    name: "Save Your Tears",
-    artist: "The Weeknd",
-    album: "After Hours",
-    cover:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
-    duration: 215,
-  },
-  {
-    id: "11",
-    name: "Kiss Me More",
-    artist: "Doja Cat, SZA",
-    album: "Planet Her",
-    cover:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
-    duration: 208,
-  },
-  {
-    id: "12",
-    name: "positions",
-    artist: "Ariana Grande",
-    album: "Positions",
-    cover:
-      "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
-    duration: 172,
+    url_audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    duracion: 200,
   },
 ]
 
-export const mockArtists: Artist[] = [
-  {
-    id: "1",
-    name: "The Weeknd",
-    image:
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop",
-  },
-  {
-    id: "2",
-    name: "Dua Lipa",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop",
-  },
-  {
-    id: "3",
-    name: "Drake",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
-  },
-  {
-    id: "4",
-    name: "Billie Eilish",
-    image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop",
-  },
-  {
-    id: "5",
-    name: "Post Malone",
-    image:
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&h=300&fit=crop",
-  },
-  {
-    id: "6",
-    name: "Ariana Grande",
-    image:
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop",
-  },
-  {
-    id: "7",
-    name: "Olivia Rodrigo",
-    image:
-      "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=300&fit=crop",
-  },
-  {
-    id: "8",
-    name: "Lil Nas X",
-    image:
-      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&h=300&fit=crop",
-  },
-]
-
-export const mockAlbums: Album[] = [
-  {
-    id: "1",
-    name: "After Hours",
-    artist: "The Weeknd",
-    cover:
-      "https://images.unsplash.com/photo-1619983081563-430f63602796?w=300&h=300&fit=crop",
-  },
-  {
-    id: "2",
-    name: "Future Nostalgia",
-    artist: "Dua Lipa",
-    cover:
-      "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=300&h=300&fit=crop",
-  },
-  {
-    id: "3",
-    name: "Certified Lover Boy",
-    artist: "Drake",
-    cover:
-      "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=300&h=300&fit=crop",
-  },
-  {
-    id: "4",
-    name: "Happier Than Ever",
-    artist: "Billie Eilish",
-    cover:
-      "https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=300&h=300&fit=crop",
-  },
-  {
-    id: "5",
-    name: "Positions",
-    artist: "Ariana Grande",
-    cover:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop",
-  },
-  {
-    id: "6",
-    name: "SOUR",
-    artist: "Olivia Rodrigo",
-    cover:
-      "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop",
-  },
-  {
-    id: "7",
-    name: "Planet Her",
-    artist: "Doja Cat",
-    cover:
-      "https://images.unsplash.com/photo-1484755560615-a4c64e778a6c?w=300&h=300&fit=crop",
-  },
-  {
-    id: "8",
-    name: "Montero",
-    artist: "Lil Nas X",
-    cover:
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop",
-  },
-]
+const defaultSettings: UserSettings = {
+  audioQuality: "high",
+  crossfade: false,
+  crossfadeDuration: 5,
+  normalizeVolume: true,
+  showLyrics: true,
+  language: "en",
+  explicitContent: true,
+}
 
 // Auth Store
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
-      login: (email: string, _password: string, name?: string) => {
+      settings: defaultSettings,
+      login: (
+        email: string,
+        _password: string,
+        name?: string,
+        role?: string,
+        token?: string
+      ) => {
         // Simulate login - in real app, validate against backend
         const user: User = {
           id: Math.random().toString(36).substr(2, 9),
           name: name || email.split("@")[0],
           email,
+          role: role || "user",
         }
-        set({ user, isAuthenticated: true })
+        set({ user, token, isAuthenticated: true })
         return true
       },
       register: (name: string, email: string, _password: string) => {
@@ -350,7 +173,17 @@ export const useAuthStore = create<AuthState>()(
         return true
       },
       logout: () => {
-        set({ user: null, isAuthenticated: false })
+        set({ user: null, token: null, isAuthenticated: false })
+      },
+      updateProfile: (name: string, avatar?: string) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, name, avatar } : null,
+        }))
+      },
+      updateSettings: (newSettings: Partial<UserSettings>) => {
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings },
+        }))
       },
     }),
     {
@@ -387,17 +220,32 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
 
     if (shuffle) {
-      const randomIndex = Math.floor(Math.random() * queue.length)
-      set({ currentSong: queue[randomIndex], progress: 0 })
+      // Pick a random song different from current if possible
+      let randomIndex = Math.floor(Math.random() * queue.length)
+      if (queue.length > 1) {
+        while (randomIndex === currentIndex) {
+          randomIndex = Math.floor(Math.random() * queue.length)
+        }
+      }
+      set({ currentSong: queue[randomIndex], progress: 0, isPlaying: true })
     } else if (currentIndex < queue.length - 1) {
-      set({ currentSong: queue[currentIndex + 1], progress: 0 })
+      set({
+        currentSong: queue[currentIndex + 1],
+        progress: 0,
+        isPlaying: true,
+      })
     } else if (repeat === "all") {
-      set({ currentSong: queue[0], progress: 0 })
+      set({ currentSong: queue[0], progress: 0, isPlaying: true })
+    } else {
+      // End of queue, stop playing
+      set({ isPlaying: false })
     }
   },
   prevSong: () => {
-    const { currentSong, queue, progress } = get()
+    const { currentSong, queue, progress, shuffle } = get()
     if (!currentSong || queue.length === 0) return
+
+    const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
 
     // If more than 3 seconds in, restart current song
     if (progress > 3) {
@@ -405,9 +253,24 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       return
     }
 
-    const currentIndex = queue.findIndex((s) => s.id === currentSong.id)
-    if (currentIndex > 0) {
-      set({ currentSong: queue[currentIndex - 1], progress: 0 })
+    if (shuffle) {
+      // In shuffle mode, pick a random previous song
+      let randomIndex = Math.floor(Math.random() * queue.length)
+      if (queue.length > 1) {
+        while (randomIndex === currentIndex) {
+          randomIndex = Math.floor(Math.random() * queue.length)
+        }
+      }
+      set({ currentSong: queue[randomIndex], progress: 0, isPlaying: true })
+    } else if (currentIndex > 0) {
+      set({
+        currentSong: queue[currentIndex - 1],
+        progress: 0,
+        isPlaying: true,
+      })
+    } else {
+      // At start of queue, restart current song
+      set({ progress: 0 })
     }
   },
   toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
@@ -423,6 +286,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         : [...state.queue, song],
     })),
   setQueue: (songs: Song[]) => set({ queue: songs }),
+  playAllFromIndex: (songs: Song[], index: number) => {
+    const song = songs[index]
+    if (song) {
+      set({ queue: songs, currentSong: song, isPlaying: true, progress: 0 })
+    }
+  },
+  clearQueue: () =>
+    set({ queue: [], currentSong: null, isPlaying: false, progress: 0 }),
 }))
 
 // Playlist Store
