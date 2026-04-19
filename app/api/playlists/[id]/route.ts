@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getUserFromToken } from "@/lib/auth";
 
+//* ACTUALIZAR NOMBRE DE PLAYLIST
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const user = await getUserFromToken(req);
