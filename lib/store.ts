@@ -6,10 +6,10 @@ import { persist } from "zustand/middleware"
 // Types
 export interface Song {
   id: string
-  name: string
-  artist: string
+  titulo: string
+  artista: string
   album: string
-  cover: string
+  portada: string
   audioUrl: string
   duration: number
 }

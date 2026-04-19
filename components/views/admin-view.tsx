@@ -18,6 +18,7 @@ import {
 interface ItemProps {
   id: string
   nombre: string
+  titulo?: string
 }
 
 export function AdminView() {
@@ -38,12 +39,18 @@ export function AdminView() {
   // Estados para las listas desplegables
   const [artistas, setArtistas] = useState<ItemProps[]>([])
   const [generos, setGeneros] = useState<ItemProps[]>([])
+  const [albums, setAlbums] = useState<ItemProps[]>([])
 
   // Estados para los modales de creación
   const [isArtistDialogOpen, setIsArtistDialogOpen] = useState(false)
   const [isGenreDialogOpen, setIsGenreDialogOpen] = useState(false)
+  const [isAlbumDialogOpen, setIsAlbumDialogOpen] = useState(false)
   const [newArtistName, setNewArtistName] = useState("")
   const [newGenreName, setNewGenreName] = useState("")
+  const [newAlbumTitle, setNewAlbumTitle] = useState("")
+  const [newAlbumCover, setNewAlbumCover] = useState<File | null>(null)
+  const [newAlbumArtistId, setNewAlbumArtistId] = useState("")
+  const [newAlbumDate, setNewAlbumDate] = useState("")
 
   // Cargar Artistas y Géneros al montar el componente
   useEffect(() => {
@@ -52,9 +59,10 @@ export function AdminView() {
 
   const fetchData = async () => {
     try {
-      const [artistasRes, generosRes] = await Promise.all([
+      const [artistasRes, generosRes, albumsRes] = await Promise.all([
         fetch("/api/artists"),
         fetch("/api/genre"),
+        fetch("/api/albums"),
       ])
 
       if (artistasRes.ok) {
@@ -64,6 +72,10 @@ export function AdminView() {
       if (generosRes.ok) {
         const data = await generosRes.json()
         setGeneros(data.data || data)
+      }
+      if (albumsRes.ok) {
+        const data = await albumsRes.json()
+        setAlbums(data.data || data) // <-- GUARDAMOS LOS ÁLBUMES
       }
     } catch (error) {
       console.error("Error al cargar datos:", error)
@@ -113,6 +125,49 @@ export function AdminView() {
       }
     } catch (e) {
       console.error("Error al crear género", e)
+    }
+  }
+
+  const handleCreateAlbum = async () => {
+    if (!newAlbumTitle.trim() || !newAlbumArtistId || !newAlbumCover) {
+      alert(
+        "Por favor, completa el título, selecciona un artista y sube una portada."
+      )
+      return
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append("titulo", newAlbumTitle)
+      formData.append("artista", newAlbumArtistId)
+      formData.append("portada", newAlbumCover)
+      formData.append("fecha_lanzamiento", newAlbumDate)
+
+      const res = await fetch("/api/albums", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
+
+      if (newAlbumDate) {
+        formData.append("fecha_lanzamiento", newAlbumDate)
+      }
+
+      if (res.ok) {
+        setNewAlbumTitle("")
+        setNewAlbumArtistId("")
+        setNewAlbumCover(null)
+        setNewAlbumDate("")
+        setIsAlbumDialogOpen(false)
+        await fetchData() // Refrescamos la lista para que aparezca el nuevo álbum
+      } else {
+        const errorData = await res.json()
+        alert(errorData.error || "Error al crear el álbum")
+      }
+    } catch (e) {
+      console.error("Error al crear álbum", e)
     }
   }
 
@@ -271,15 +326,30 @@ export function AdminView() {
             {/* --- Columna 2 --- */}
             <div className="space-y-4">
               <Field>
-                <FieldLabel htmlFor="albumId">
-                  ID del Álbum (Opcional)
-                </FieldLabel>
-                <Input
-                  id="albumId"
-                  value={albumId}
-                  onChange={(e) => setAlbumId(e.target.value)}
-                  placeholder="ID en base de datos"
-                />
+                <FieldLabel htmlFor="albumId">Álbum (Opcional)</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <select
+                    id="albumId"
+                    value={albumId}
+                    onChange={(e) => setAlbumId(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  >
+                    <option value="">Sencillo (Sin álbum)</option>
+                    {albums?.map((album) => (
+                      <option key={album.id} value={album.id}>
+                        {album.titulo}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsAlbumDialogOpen(true)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </Field>
 
               <Field>
@@ -348,6 +418,86 @@ export function AdminView() {
               Cancelar
             </Button>
             <Button onClick={handleCreateArtist}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL: Crear Álbum */}
+      <Dialog open={isAlbumDialogOpen} onOpenChange={setIsAlbumDialogOpen}>
+        <DialogContent className="border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Añadir Nuevo Álbum</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Título */}
+            <Field>
+              <FieldLabel htmlFor="newAlbumTitle">
+                Título del álbum *
+              </FieldLabel>
+              <Input
+                id="newAlbumTitle"
+                value={newAlbumTitle}
+                onChange={(e) => setNewAlbumTitle(e.target.value)}
+                className="border-border bg-secondary"
+              />
+            </Field>
+
+            {/* Selección de Artista (Solo selección, como pediste) */}
+            <Field>
+              <FieldLabel htmlFor="newAlbumArtistId">
+                Artista del Álbum *
+              </FieldLabel>
+              <select
+                id="newAlbumArtistId"
+                value={newAlbumArtistId}
+                onChange={(e) => setNewAlbumArtistId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                <option value="">Selecciona el artista...</option>
+                {artistas?.map((artista) => (
+                  <option key={artista.id} value={artista.id}>
+                    {artista.nombre}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            {/* FECHA DE LANZAMIENTO (Nuevo campo) */}
+            <Field>
+              <FieldLabel htmlFor="newAlbumDate">
+                Fecha de Lanzamiento
+              </FieldLabel>
+              <Input
+                id="newAlbumDate"
+                type="date"
+                value={newAlbumDate}
+                onChange={(e) => setNewAlbumDate(e.target.value)}
+                className="border-border bg-secondary"
+              />
+            </Field>
+
+            {/* Portada */}
+            <Field>
+              <FieldLabel htmlFor="newAlbumCover">
+                Portada del álbum *
+              </FieldLabel>
+              <Input
+                id="newAlbumCover"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewAlbumCover(e.target.files?.[0] || null)}
+                className="cursor-pointer border-border bg-secondary"
+              />
+            </Field>
+          </div>
+          <DialogFooter>
+            <Button
+              variant={"outline"}
+              onClick={() => setIsAlbumDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateAlbum}>Guardar Álbum</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

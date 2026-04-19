@@ -36,8 +36,8 @@ export function SongCard({ song }: SongCardProps) {
     <div className="group relative cursor-pointer rounded-lg bg-card p-3 transition-all duration-300 hover:bg-secondary/80 active:scale-[0.98] sm:p-4">
       <div className="relative mb-3 aspect-square sm:mb-4">
         <img
-          src={song.cover}
-          alt={song.name}
+          src={song.portada}
+          alt={song.titulo}
           className="h-full w-full rounded-md object-cover shadow-lg"
         />
         <button
@@ -95,10 +95,10 @@ export function SongCard({ song }: SongCardProps) {
         </DropdownMenu>
       </div>
       <h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
-        {song.name}
+        {song.titulo}
       </h3>
       <p className="mt-0.5 truncate text-xs text-muted-foreground sm:mt-1 sm:text-sm">
-        {song.artist}
+        {song.artista}
       </p>
     </div>
   )
