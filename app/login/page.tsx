@@ -15,7 +15,7 @@ export default function LoginPage() {
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -24,11 +24,26 @@ export default function LoginPage() {
       return
     }
 
-    const success = login(email, password)
-    if (success) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Credenciales inválidas.")
+        return
+      }
+
+      login(email, password, data.nombre)
       router.push("/")
-    } else {
-      setError("Credenciales inválidas.")
+    } catch (err) {
+      setError("Ocurrió un error al conectar con el servidor.")
     }
   }
 

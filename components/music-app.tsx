@@ -4,9 +4,12 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
-import { MobileNav } from "./movile-nav"
+import { MobileNav } from "./mobile-nav"
 import { PlayerBar } from "./player-bar"
 import { HomeView } from "./views/home-view"
+import { PlaylistView } from "./views/playlist-view"
+import { SettingsView } from "./views/settings-view"
+import { LibraryView } from "./views/library-view"
 import { SearchView } from "./views/search-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
 
@@ -31,6 +34,12 @@ export function MusicApp() {
         return <HomeView />
       case "search":
         return <SearchView />
+      case "library":
+        return <LibraryView />
+      case "playlist":
+        return <PlaylistView />
+      case "settings":
+        return <SettingsView />
       default:
         return <HomeView />
     }
