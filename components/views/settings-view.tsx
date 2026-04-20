@@ -41,26 +41,26 @@ export function SettingsView() {
     <div className="space-y-2">
       <SettingsMenuItem
         icon={User}
-        label="Profile"
-        description="Edit your profile information"
+        label="Perfil"
+        description="Edita la información de tu  perfil"
         onClick={() => setCurrentSection("profile")}
       />
       <SettingsMenuItem
         icon={Volume2}
-        label="Playback"
-        description="Audio quality, crossfade, and more"
+        label="Reproducción"
+        description="Calidad del audio, fade, y más"
         onClick={() => setCurrentSection("playback")}
       />
       <SettingsMenuItem
         icon={Globe}
-        label="Language"
-        description="Change app language"
+        label="Idioma"
+        description="Cambiar el idioma de la aplicación"
         onClick={() => setCurrentSection("language")}
       />
       <SettingsMenuItem
         icon={Shield}
-        label="Content Preferences"
-        description="Explicit content settings"
+        label="Preferencias de Contenido"
+        description="Configuración de contenido explícito"
         onClick={() => setCurrentSection("content")}
       />
     </div>
@@ -73,7 +73,7 @@ export function SettingsView() {
         className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back</span>
+        <span>Regresar</span>
       </button>
 
       <div className="flex flex-col items-center gap-4">
@@ -85,19 +85,17 @@ export function SettingsView() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            Display Name
-          </label>
+          <label className="text-sm font-medium text-foreground">Nombre</label>
           <Input
             value={profileName}
             onChange={(e) => setProfileName(e.target.value)}
             className="border-border bg-secondary"
-            placeholder="Your name"
+            placeholder="Tu nombre"
           />
         </div>
 
         <Button onClick={handleSaveProfile} className="w-full">
-          Save Changes
+          Guardar Cambios
         </Button>
       </div>
     </div>
@@ -110,17 +108,17 @@ export function SettingsView() {
         className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back</span>
+        <span>Regresar</span>
       </button>
 
       <h3 className="text-lg font-semibold text-foreground">
-        Playback Settings
+        Configuración de Reproducción
       </h3>
 
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Audio Quality
+            Calidad de Audio
           </label>
           <Select
             value={settings.audioQuality}
@@ -132,19 +130,19 @@ export function SettingsView() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="border-border bg-card">
-              <SelectItem value="low">Low (96 kbps)</SelectItem>
+              <SelectItem value="low">Baja (96 kbps)</SelectItem>
               <SelectItem value="normal">Normal (160 kbps)</SelectItem>
-              <SelectItem value="high">High (320 kbps)</SelectItem>
+              <SelectItem value="high">Alta (320 kbps)</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Higher quality uses more data
+            La calidad más alta utiliza más datos
           </p>
         </div>
 
         <SettingsToggle
           label="Crossfade"
-          description="Smoothly transition between songs"
+          description="Transición suave entre canciones"
           checked={settings.crossfade}
           onCheckedChange={(checked) => updateSettings({ crossfade: checked })}
         />
@@ -152,7 +150,7 @@ export function SettingsView() {
         {settings.crossfade && (
           <div className="space-y-2 border-l-2 border-border pl-4">
             <label className="text-sm font-medium text-foreground">
-              Crossfade Duration: {settings.crossfadeDuration}s
+              Duración: {settings.crossfadeDuration}s
             </label>
             <input
               type="range"
@@ -168,8 +166,8 @@ export function SettingsView() {
         )}
 
         <SettingsToggle
-          label="Normalize Volume"
-          description="Set the same volume level for all songs"
+          label="Normalizar Volumen"
+          description="Establecer el mismo nivel de volumen para todas las canciones"
           checked={settings.normalizeVolume}
           onCheckedChange={(checked) =>
             updateSettings({ normalizeVolume: checked })
@@ -177,8 +175,8 @@ export function SettingsView() {
         />
 
         <SettingsToggle
-          label="Show Lyrics"
-          description="Display lyrics when available"
+          label="Mostrar Letras"
+          description="Mostrar letras cuando están disponibles"
           checked={settings.showLyrics}
           onCheckedChange={(checked) => updateSettings({ showLyrics: checked })}
         />
@@ -193,10 +191,10 @@ export function SettingsView() {
         className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back</span>
+        <span>Regresar</span>
       </button>
 
-      <h3 className="text-lg font-semibold text-foreground">Language</h3>
+      <h3 className="text-lg font-semibold text-foreground">Idioma</h3>
 
       <div className="space-y-2">
         <Select
@@ -227,16 +225,16 @@ export function SettingsView() {
         className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back</span>
+        <span>Regresar</span>
       </button>
 
       <h3 className="text-lg font-semibold text-foreground">
-        Content Preferences
+        Preferencias de Contenido
       </h3>
 
       <SettingsToggle
-        label="Allow Explicit Content"
-        description="Play songs with explicit lyrics"
+        label="Permitir Contenido Explícito"
+        description="Reproducir canciones con letras explícitas"
         checked={settings.explicitContent}
         onCheckedChange={(checked) =>
           updateSettings({ explicitContent: checked })
@@ -288,7 +286,7 @@ export function SettingsView() {
             onClick={logout}
             className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
           >
-            Log Out
+            Cerrar Sesión
           </Button>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Soundwave v1.0.0
