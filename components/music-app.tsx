@@ -14,6 +14,41 @@ import { SearchView } from "./views/search-view"
 import { AdminView } from "./views/admin-view"
 import { AlbumView } from "./views/album-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
+import { StatusBar, Style } from "@capacitor/status-bar"
+import { App as CapacitorApp } from "@capacitor/app"
+
+function MobileNavigationHandler() {
+  const { currentView, setView } = useNavigationStore()
+
+  useEffect(() => {
+    let listener: any = null
+
+    const setupListener = async () => {
+      try {
+        listener = await CapacitorApp.addListener("backButton", () => {
+          const state = useNavigationStore.getState()
+          if (state.viewHistory.length > 0) {
+            state.goBack()
+          } else {
+            CapacitorApp.minimizeApp()
+          }
+        })
+      } catch (error) {
+        console.log("Capacitor no detectado (entorno web normal)")
+      }
+    }
+
+    setupListener()
+
+    return () => {
+      if (listener) {
+        listener.remove()
+      }
+    }
+  }, [currentView, setView])
+
+  return null
+}
 
 export function MusicApp() {
   const router = useRouter()
@@ -22,14 +57,29 @@ export function MusicApp() {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    setIsReady(true)
+    const setupStatusBar = async () => {
+      try {
+        await StatusBar.setStyle({ style: Style.Dark })
+        await StatusBar.setOverlaysWebView({ overlay: true })
+      } catch (error) {
+        console.log("Capacitor Status Bar no detectado (entorno web)")
+      }
+    }
+
+    const init = async () => {
+      await setupStatusBar()
+      setIsReady(true)
+    }
+
+    init()
   }, [])
 
+  // Verificación de autenticación
   useEffect(() => {
     if (isReady && !isAuthenticated) {
       router.push("/login")
     }
-  }, [!isAuthenticated, router])
+  }, [isReady, isAuthenticated, router])
 
   if (!isReady || !isAuthenticated) {
     return null
@@ -55,8 +105,11 @@ export function MusicApp() {
         return <HomeView />
     }
   }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      <MobileNavigationHandler />
+
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto pb-36 md:pb-24">

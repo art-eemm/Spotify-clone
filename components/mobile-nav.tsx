@@ -32,7 +32,7 @@ export function MobileNav() {
         />
         <NavButton
           icon={Library}
-          label="Catálogo"
+          label="Biblioteca"
           active={currentView === "library" || currentView === "playlist"}
           onClick={() => setView("library")}
         />

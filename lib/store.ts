@@ -114,6 +114,11 @@ interface NavigationState {
   currentPlaylistId: string | null
   currentAlbumId: string | null
   searchQuery: string
+  viewHistory: {
+    view: string
+    playlistId: string | null
+    albumId: string | null
+  }[]
   setView: (
     view:
       | "home"
@@ -127,6 +132,7 @@ interface NavigationState {
   setCurrentPlaylistId: (id: string | null) => void
   setCurrentAlbumId: (id: string | null) => void
   setSearchQuery: (query: string) => void
+  goBack: () => void
 }
 
 // Mock Data
@@ -372,28 +378,71 @@ export const useNavigationStore = create<NavigationState>()(
       currentPlaylistId: null,
       currentAlbumId: null,
       searchQuery: "",
+      viewHistory: [],
+
       setView: (view) =>
-        set({
-          currentView: view,
-          currentPlaylistId: null,
-          currentAlbumId: null,
+        set((state) => {
+          if (state.currentView === view) return {}
+          return {
+            viewHistory: [
+              ...state.viewHistory,
+              {
+                view: state.currentView,
+                playlistId: state.currentPlaylistId,
+                albumId: state.currentAlbumId,
+              },
+            ],
+            currentView: view,
+            currentPlaylistId: null,
+            currentAlbumId: null,
+          }
         }),
+
       setCurrentPlaylistId: (id) =>
-        set({
+        set((state) => ({
+          viewHistory: [
+            ...state.viewHistory,
+            {
+              view: state.currentView,
+              playlistId: state.currentPlaylistId,
+              albumId: state.currentAlbumId,
+            },
+          ],
           currentPlaylistId: id,
           currentView: "playlist",
           currentAlbumId: null,
-        }),
+        })),
+
       setCurrentAlbumId: (id) =>
-        set({
+        set((state) => ({
+          viewHistory: [
+            ...state.viewHistory,
+            {
+              view: state.currentView,
+              playlistId: state.currentPlaylistId,
+              albumId: state.currentAlbumId,
+            },
+          ],
           currentAlbumId: id,
           currentView: "album",
           currentPlaylistId: null,
+        })),
+
+      goBack: () =>
+        set((state) => {
+          const history = [...state.viewHistory]
+          if (history.length === 0) return {}
+
+          const previous = history.pop()!
+          return {
+            viewHistory: history,
+            currentView: previous.view as any,
+            currentPlaylistId: previous.playlistId,
+            currentAlbumId: previous.albumId,
+          }
         }),
       setSearchQuery: (query) => set({ searchQuery: query }),
     }),
-    {
-      name: "navigation-storage",
-    }
+    { name: "navigation-storage" }
   )
 )

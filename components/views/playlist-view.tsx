@@ -65,7 +65,7 @@ export function PlaylistView() {
         className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-5 w-5" />
-        Back to Library
+        Regresar
       </button>
 
       {/* Playlist Header */}
