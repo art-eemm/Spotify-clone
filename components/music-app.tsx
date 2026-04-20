@@ -16,6 +16,7 @@ import { AlbumView } from "./views/album-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
 import { StatusBar, Style } from "@capacitor/status-bar"
 import { App as CapacitorApp } from "@capacitor/app"
+import { Capacitor } from "@capacitor/core" // <-- 1. AÑADIMOS ESTA IMPORTACIÓN
 
 function MobileNavigationHandler() {
   const { currentView, setView } = useNavigationStore()
@@ -55,8 +56,11 @@ export function MusicApp() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const currentView = useNavigationStore((state) => state.currentView)
   const [isReady, setIsReady] = useState(false)
+  const [isMobileApp, setIsMobileApp] = useState(false)
 
   useEffect(() => {
+    setIsMobileApp(Capacitor.isNativePlatform())
+
     const setupStatusBar = async () => {
       try {
         await StatusBar.setStyle({ style: Style.Dark })
@@ -74,7 +78,6 @@ export function MusicApp() {
     init()
   }, [])
 
-  // Verificación de autenticación
   useEffect(() => {
     if (isReady && !isAuthenticated) {
       router.push("/login")
@@ -107,7 +110,11 @@ export function MusicApp() {
   }
 
   return (
-    <div className="flex h-[100dvh] w-full overflow-hidden bg-background pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]">
+    <div
+      className={`flex h-[100dvh] w-full overflow-hidden bg-background ${
+        isMobileApp ? "pt-12 pb-6" : ""
+      }`}
+    >
       <MobileNavigationHandler />
 
       <Sidebar />
