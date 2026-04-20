@@ -188,13 +188,13 @@ export function AdminView() {
       const audioFileName = `${Date.now()}-${safeAudioName}`
 
       const { error: audioError } = await supabaseClient.storage
-        .from("canciones")
+        .from("songs")
         .upload(audioFileName, audioFile)
 
       if (audioError) throw new Error("Error al subir el audio a Supabase")
 
       const { data: audioData } = supabaseClient.storage
-        .from("canciones")
+        .from("songs")
         .getPublicUrl(audioFileName)
 
       let portadaUrl = null
