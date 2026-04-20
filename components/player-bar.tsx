@@ -149,7 +149,7 @@ export function PlayerBar() {
       />
 
       {/* Mini Player Bar */}
-      <div className="fixed inset-0 z-50 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed right-0 bottom-0 left-0 z-50 flex h-16 items-center justify-between border-t border-border bg-card/95 px-2 backdrop-blur-lg sm:px-4 md:h-20">
         {/* Current song Info */}
         <button
           onClick={() => setIsExpanded(true)}
