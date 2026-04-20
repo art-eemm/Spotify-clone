@@ -12,6 +12,7 @@ import { SettingsView } from "./views/settings-view"
 import { LibraryView } from "./views/library-view"
 import { SearchView } from "./views/search-view"
 import { AdminView } from "./views/admin-view"
+import { AlbumView } from "./views/album-view"
 import { useAuthStore, useNavigationStore } from "@/lib/store"
 
 export function MusicApp() {
@@ -44,6 +45,8 @@ export function MusicApp() {
         return <LibraryView />
       case "playlist":
         return <PlaylistView />
+      case "album":
+        return <AlbumView />
       case "settings":
         return <SettingsView />
       case "admin":

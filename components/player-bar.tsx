@@ -85,7 +85,7 @@ export function PlayerBar() {
 
     audio.addEventListener("ended", handleEnded)
     return () => audio.removeEventListener("ended", handleEnded)
-  }, [repeat, nextSong])
+  }, [repeat, nextSong, currentSong])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -106,7 +106,7 @@ export function PlayerBar() {
       audio.removeEventListener("timeupdate", handleTimeUpdate)
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata)
     }
-  }, [setProgress, setDuration])
+  }, [setProgress, setDuration, currentSong])
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current || !currentSong) return

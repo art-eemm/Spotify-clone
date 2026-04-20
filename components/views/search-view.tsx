@@ -1,16 +1,65 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { SongCard } from "../song-card"
 import { ArtistCard } from "../artist-card"
 import { AlbumCard } from "../album-card"
-import { useNavigationStore, mockSongs } from "@/lib/store"
+import { useNavigationStore, Song, Album } from "@/lib/store"
 import { Search } from "lucide-react"
 
 export function SearchView() {
   const searchQuery = useNavigationStore((state) => state.searchQuery)
 
+  const [dbSongs, setDbSongs] = useState<Song[]>([])
+  const [dbAlbums, setDbAlbums] = useState<Album[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const response = await fetch("/api/songs")
+        const data = await response.json()
+
+        const formattedSongs: Song[] = data.map((song: any) => ({
+          id: song.id,
+          titulo: song.titulo,
+          duracion: song.duracion,
+          url_audio: song.url_audio,
+          portada: song.portada,
+          artista:
+            song.cancion_artista?.[0]?.artistas?.nombre ||
+            "Artista desconocido",
+          album_id: song.albums?.titulo || undefined,
+        }))
+
+        setDbSongs(formattedSongs)
+      } catch (error) {
+        console.error("Error al cargar canciones de BD:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    const fetchAlbums = async () => {
+      try {
+        const response = await fetch("/api/albums")
+        const data = await response.json()
+        setDbAlbums(data)
+      } catch (error) {
+        console.error("Error al cargar álbumes de BD:", error)
+      }
+    }
+
+    fetchSongs()
+    fetchAlbums()
+  }, [])
+
   const filteredResults = useMemo(() => {
+    if (showAll && !searchQuery.trim()) {
+      return { songs: dbSongs, artists: [], albums: dbAlbums }
+    }
+
     if (!searchQuery.trim()) {
       return { songs: [], artists: [], albums: [] }
     }
@@ -18,28 +67,29 @@ export function SearchView() {
     const query = searchQuery.toLowerCase()
 
     return {
-      songs: mockSongs.filter(
+      songs: dbSongs.filter(
         (song) =>
           song.titulo.toLowerCase().includes(query) ||
           song.artista.toLowerCase().includes(query) ||
-          song.album_id?.toLowerCase().includes(query)
+          (song.album_id && song.album_id.toLowerCase().includes(query))
       ),
-      // artists: mockArtists.filter((artista) =>
-      //   artist.nombre.toLowerCase().includes(query)
-      // ),
-      // albums: mockAlbums.filter(
-      //   (album) =>
-      //     album.titulo.toLowerCase().includes(query) ||
-      //     album.artista?.toLowerCase().includes(query)
-      // ),
+      albums: dbAlbums.filter((album) =>
+        album.titulo.toLowerCase().includes(query)
+      ),
     }
-  }, [searchQuery])
+  }, [searchQuery, dbSongs, dbAlbums, showAll])
 
   const hasResults = filteredResults.songs.length > 0
-  // filteredResults.artists.length > 0 ||
-  // filteredResults.albums.length > 0
 
-  if (!searchQuery.trim()) {
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center py-20">
+        <p className="text-sm text-muted-foreground">Cargando canciones...</p>
+      </div>
+    )
+  }
+
+  if (!searchQuery.trim() && !showAll) {
     return (
       <div className="px-4 pb-8 md:px-8">
         <div className="flex flex-col items-center justify-center py-12 sm:py-20">
@@ -52,6 +102,13 @@ export function SearchView() {
           <p className="max-w-md px-4 text-center text-sm text-muted-foreground sm:text-base">
             Encuntra tus canciones favoritas, artistas y albums
           </p>
+
+          <button
+            onClick={() => setShowAll(true)}
+            className="mt-6 rounded-full bg-primary px-8 py-3 text-sm font-bold text-primary-foreground transition-all hover:scale-105 active:scale-95"
+          >
+            Ver todas las canciones
+          </button>
         </div>
 
         {/* Browse */}
@@ -74,7 +131,7 @@ export function SearchView() {
             ].map((genre) => (
               <div
                 key={genre.name}
-                className={`bg-gradient-to-br ${genre.color} flex h-32 cursor-pointer items-end rounded-lg p-4 transition-transform hover:scale-105`}
+                className={`bg-linear-to-br ${genre.color} flex h-32 cursor-pointer items-end rounded-lg p-4 transition-transform hover:scale-105`}
               >
                 <span className="text-lg font-bold text-white">
                   {genre.name}
@@ -97,6 +154,14 @@ export function SearchView() {
           <p className="max-w-md text-center text-muted-foreground">
             Por favor asegurate de haber escrito bien, o usa otra palabra clave.
           </p>
+          {showAll && (
+            <button
+              onClick={() => setShowAll(false)}
+              className="mt-6 text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              Volver a explorar
+            </button>
+          )}
         </div>
       </div>
     )
@@ -104,10 +169,28 @@ export function SearchView() {
 
   return (
     <div className="px-4 pb-8 md:px-8">
+      {showAll && !searchQuery.trim() && (
+        <div className="mb-6 flex items-center justify-between pt-6">
+          <h2 className="text-2xl font-bold text-foreground">
+            Todas las canciones
+          </h2>
+          <button
+            onClick={() => setShowAll(false)}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Volver a explorar
+          </button>
+        </div>
+      )}
+
       {/* Results */}
       {filteredResults.songs.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-bold text-foreground">Canciones</h2>
+        <section className="mt-4 mb-8">
+          {searchQuery.trim() && (
+            <h2 className="mb-4 text-2xl font-bold text-foreground">
+              Resultados
+            </h2>
+          )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {filteredResults.songs.map((song) => (
               <SongCard key={song.id} song={song} />
@@ -129,7 +212,7 @@ export function SearchView() {
       )} */}
 
       {/* Albums Results */}
-      {/* {filteredResults.albums.length > 0 && (
+      {filteredResults.albums.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-bold text-foreground">Albums</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -138,7 +221,7 @@ export function SearchView() {
             ))}
           </div>
         </section>
-      )} */}
+      )}
     </div>
   )
 }

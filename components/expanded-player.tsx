@@ -90,6 +90,7 @@ export function ExpandedPlayer({
   }
 
   const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return "0:00" // <- BLINDAJE CONTRA NaN
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, "0")}`
