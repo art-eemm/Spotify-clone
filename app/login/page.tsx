@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
 
@@ -24,26 +25,20 @@ export default function LoginPage() {
       return
     }
 
+    setIsLoading(true)
+
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      const result = await login(email, password)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || "Credenciales inválidas.")
-        return
+      if (result.success) {
+        router.replace("/")
+      } else {
+        setError(result.error || "Credenciales inválidas.")
       }
-
-      login(email, password, data.nombre, data.role, data.token)
-      router.push("/")
     } catch (err) {
       setError("Ocurrió un error al conectar con el servidor.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -105,9 +100,10 @@ export default function LoginPage() {
 
             <Button
               type="submit"
+              disabled={isLoading}
               className="mt-6 w-full rounded-full bg-primary py-3 font-semibold text-primary-foreground hover:cursor-pointer hover:bg-primary/80"
             >
-              Iniciar Sesión
+              {isLoading ? "Iniciando..." : "Iniciar Sesión"}
             </Button>
           </form>
 

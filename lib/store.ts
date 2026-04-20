@@ -2,6 +2,7 @@
 
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import { supabaseClient } from "./supabaseClient"
 
 // Types
 export interface Song {
@@ -59,13 +60,14 @@ interface AuthState {
   settings: UserSettings
   login: (
     email: string,
-    password: string,
-    name?: string,
-    role?: string,
-    token?: string
-  ) => boolean
-  register: (name: string, email: string, password: string) => boolean
-  logout: () => void
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>
+  register: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>
+  logout: () => Promise<void>
   updateProfile: (name: string, avatar?: string) => void
   updateSettings: (settings: Partial<UserSettings>) => void
 }
@@ -167,42 +169,86 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       settings: defaultSettings,
-      login: (
-        email: string,
-        _password: string,
-        name?: string,
-        role?: string,
-        token?: string
-      ) => {
-        // Simulate login - in real app, validate against backend
-        const user: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          name: name || email.split("@")[0],
-          email,
-          role: role || "user",
+
+      login: async (email, password) => {
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+          if (error) throw error
+
+          if (data.user) {
+            const role = data.user.user_metadata?.role || "user"
+
+            set({
+              user: {
+                id: data.user.id,
+                name:
+                  data.user.user_metadata?.name ||
+                  data.user.email?.split("@")[0] ||
+                  "",
+                email: data.user.email || "",
+                role: role,
+                avatar: data.user.user_metadata?.avatar,
+              },
+              token: data.session?.access_token || null,
+              isAuthenticated: true,
+            })
+            return { success: true }
+          }
+          return { success: false, error: "No se pudo obtener el usuario" }
+        } catch (error: any) {
+          return { success: false, error: error.message }
         }
-        set({ user, token, isAuthenticated: true })
-        return true
       },
-      register: (name: string, email: string, _password: string) => {
-        // Simulate registration
-        const user: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          name,
-          email,
+
+      register: async (name, email, password) => {
+        try {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                name: name,
+                role: "user",
+              },
+            },
+          })
+
+          if (error) throw error
+
+          if (data.user) {
+            set({
+              user: {
+                id: data.user.id,
+                name: name,
+                email: data.user.email || "",
+                role: "user",
+              },
+              isAuthenticated: true,
+            })
+            return { success: true }
+          }
+          return { success: false, error: "Error al registrar usuario" }
+        } catch (error: any) {
+          return { success: false, error: error.message }
         }
-        set({ user, isAuthenticated: true })
-        return true
       },
-      logout: () => {
+
+      logout: async () => {
+        await supabaseClient.auth.signOut()
         set({ user: null, token: null, isAuthenticated: false })
       },
-      updateProfile: (name: string, avatar?: string) => {
+
+      updateProfile: (name, avatar) => {
         set((state) => ({
           user: state.user ? { ...state.user, name, avatar } : null,
         }))
       },
-      updateSettings: (newSettings: Partial<UserSettings>) => {
+
+      updateSettings: (newSettings) => {
         set((state) => ({
           settings: { ...state.settings, ...newSettings },
         }))
