@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { supabaseClient } from "@/lib/supabaseClient"
 
 // Interfaces temporales para tipar los datos
 interface ItemProps {
@@ -180,25 +181,61 @@ export function AdminView() {
     }
 
     setIsLoading(true)
-    setMessage("Subiendo canción y procesando archivos...")
 
     try {
-      const formData = new FormData()
-      formData.append("titulo", titulo)
-      formData.append("duracion", duracion)
-      formData.append("genero", generoId)
-      formData.append("artista", artistaId)
-      formData.append("audio", audioFile)
+      setMessage("Subiendo archivo de audio...")
+      const safeAudioName = audioFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")
+      const audioFileName = `${Date.now()}-${safeAudioName}`
 
-      if (albumId) formData.append("album_id", albumId)
-      if (portadaFile) formData.append("portada", portadaFile)
+      const { error: audioError } = await supabaseClient.storage
+        .from("canciones")
+        .upload(audioFileName, audioFile)
+
+      if (audioError) throw new Error("Error al subir el audio a Supabase")
+
+      const { data: audioData } = supabaseClient.storage
+        .from("canciones")
+        .getPublicUrl(audioFileName)
+
+      let portadaUrl = null
+      if (portadaFile) {
+        setMessage("Subiendo portada...")
+        const safePortadaName = portadaFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")
+        const portadaFileName = `${Date.now()}-${safePortadaName}`
+
+        const { error: portadaError } = await supabaseClient.storage
+          .from("portadas")
+          .upload(portadaFileName, portadaFile)
+
+        if (portadaError)
+          throw new Error("Error al subir la portada a Supabase")
+
+        const { data: coverData } = supabaseClient.storage
+          .from("portadas")
+          .getPublicUrl(portadaFileName)
+
+        portadaUrl = coverData.publicUrl
+      }
+
+      setMessage("Guardando información en la base de datos...")
+
+      const songData = {
+        titulo: titulo,
+        duracion: parseInt(duracion),
+        genero_id: generoId,
+        artista_id: artistaId,
+        album_id: albumId || null,
+        url_audio: audioData.publicUrl,
+        portada: portadaUrl,
+      }
 
       const response = await fetch("/api/songs", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // <-- AQUÍ ESTÁ EL CAMBIO IMPORTANTE
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify(songData),
       })
 
       const data = await response.json()
@@ -213,12 +250,17 @@ export function AdminView() {
         setAudioFile(null)
         setPortadaFile(null)
         ;(document.getElementById("audio") as HTMLInputElement).value = ""
-        ;(document.getElementById("portada") as HTMLInputElement).value = ""
+        if (document.getElementById("portada")) {
+          ;(document.getElementById("portada") as HTMLInputElement).value = ""
+        }
       } else {
-        setMessage(data.error || "Error al agregar la canción.")
+        setMessage(
+          data.error || "Error al registrar la canción en la base de datos."
+        )
       }
-    } catch (err) {
-      setMessage("Error de conexión al subir la canción.")
+    } catch (err: any) {
+      console.error(err)
+      setMessage(err.message || "Error de conexión al subir la canción.")
     } finally {
       setIsLoading(false)
     }
