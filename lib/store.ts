@@ -103,13 +103,29 @@ interface PlaylistState {
 }
 
 interface NavigationState {
-  currentView: "home" | "search" | "library" | "playlist" | "settings" | "admin"
+  currentView:
+    | "home"
+    | "search"
+    | "library"
+    | "playlist"
+    | "settings"
+    | "admin"
+    | "album"
   currentPlaylistId: string | null
+  currentAlbumId: string | null
   searchQuery: string
   setView: (
-    view: "home" | "search" | "library" | "playlist" | "settings" | "admin"
+    view:
+      | "home"
+      | "search"
+      | "library"
+      | "playlist"
+      | "settings"
+      | "admin"
+      | "album"
   ) => void
   setCurrentPlaylistId: (id: string | null) => void
+  setCurrentAlbumId: (id: string | null) => void
   setSearchQuery: (query: string) => void
 }
 
@@ -349,12 +365,35 @@ export const usePlaylistStore = create<PlaylistState>()(
 )
 
 // Navigation Store
-export const useNavigationStore = create<NavigationState>((set) => ({
-  currentView: "home",
-  currentPlaylistId: null,
-  searchQuery: "",
-  setView: (view) => set({ currentView: view, currentPlaylistId: null }),
-  setCurrentPlaylistId: (id) =>
-    set({ currentPlaylistId: id, currentView: "playlist" }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
-}))
+export const useNavigationStore = create<NavigationState>()(
+  persist(
+    (set) => ({
+      currentView: "home",
+      currentPlaylistId: null,
+      currentAlbumId: null,
+      searchQuery: "",
+      setView: (view) =>
+        set({
+          currentView: view,
+          currentPlaylistId: null,
+          currentAlbumId: null,
+        }),
+      setCurrentPlaylistId: (id) =>
+        set({
+          currentPlaylistId: id,
+          currentView: "playlist",
+          currentAlbumId: null,
+        }),
+      setCurrentAlbumId: (id) =>
+        set({
+          currentAlbumId: id,
+          currentView: "album",
+          currentPlaylistId: null,
+        }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
+    }),
+    {
+      name: "navigation-storage",
+    }
+  )
+)

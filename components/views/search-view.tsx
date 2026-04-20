@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from "react"
 import { SongCard } from "../song-card"
 import { ArtistCard } from "../artist-card"
 import { AlbumCard } from "../album-card"
-import { useNavigationStore, Song } from "@/lib/store"
+import { useNavigationStore, Song, Album } from "@/lib/store"
 import { Search } from "lucide-react"
 
 export function SearchView() {
   const searchQuery = useNavigationStore((state) => state.searchQuery)
 
   const [dbSongs, setDbSongs] = useState<Song[]>([])
+  const [dbAlbums, setDbAlbums] = useState<Album[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
 
@@ -39,12 +40,24 @@ export function SearchView() {
         setIsLoading(false)
       }
     }
+
+    const fetchAlbums = async () => {
+      try {
+        const response = await fetch("/api/albums")
+        const data = await response.json()
+        setDbAlbums(data)
+      } catch (error) {
+        console.error("Error al cargar álbumes de BD:", error)
+      }
+    }
+
     fetchSongs()
+    fetchAlbums()
   }, [])
 
   const filteredResults = useMemo(() => {
     if (showAll && !searchQuery.trim()) {
-      return { songs: dbSongs, artists: [], albums: [] }
+      return { songs: dbSongs, artists: [], albums: dbAlbums }
     }
 
     if (!searchQuery.trim()) {
@@ -60,8 +73,11 @@ export function SearchView() {
           song.artista.toLowerCase().includes(query) ||
           (song.album_id && song.album_id.toLowerCase().includes(query))
       ),
+      albums: dbAlbums.filter((album) =>
+        album.titulo.toLowerCase().includes(query)
+      ),
     }
-  }, [searchQuery, dbSongs, showAll])
+  }, [searchQuery, dbSongs, dbAlbums, showAll])
 
   const hasResults = filteredResults.songs.length > 0
 
@@ -196,7 +212,7 @@ export function SearchView() {
       )} */}
 
       {/* Albums Results */}
-      {/* {filteredResults.albums.length > 0 && (
+      {filteredResults.albums.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-bold text-foreground">Albums</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -205,7 +221,7 @@ export function SearchView() {
             ))}
           </div>
         </section>
-      )} */}
+      )}
     </div>
   )
 }

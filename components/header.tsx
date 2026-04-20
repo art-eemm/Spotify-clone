@@ -106,7 +106,7 @@ export function Header() {
               onClick={() => setView("settings")}
               className="cursor-pointer focus:bg-secondary"
             >
-              <User className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               Configuración
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
