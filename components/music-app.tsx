@@ -110,11 +110,7 @@ export function MusicApp() {
   }
 
   return (
-    <div
-      className={`flex h-[100dvh] w-full overflow-hidden bg-background ${
-        isMobileApp ? "pt-12 pb-6" : ""
-      }`}
-    >
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <MobileNavigationHandler />
 
       <Sidebar />
